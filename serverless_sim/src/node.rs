@@ -264,9 +264,9 @@ impl Node {
                 Box::new(move |to_replace| {
                     let node = node.as_ref();
                     // log::info!("节点{}要移除的容器{}", node.node_id, to_replace);
-                    for (_k, v) in node.fn_containers.borrow().iter() {
-                        // log::info!("{}", v.fn_id);
-                    }
+                    // for (_k, v) in node.fn_containers.borrow().iter() {
+                    //     log::info!("{}", v.fn_id);
+                    // }
                     node.container(*to_replace).unwrap().is_idle()
                 }),
             );
@@ -311,6 +311,7 @@ impl Node {
             }
         }
     }
+
     // 尝试加载节点上所有待处理任务的容器
     // 如果内存足够且容器不存在，则创建新容器，将任务状态添加到容器，并从待处理任务集合中移除
     pub fn load_container(&self, env: &SimEnv) {
@@ -349,6 +350,108 @@ impl Node {
             self.pending_tasks.borrow_mut().remove(&(req_id, fnid));
         }
     }
+
+    // pub fn load_container(&self, env: &SimEnv) {
+    //     // 记录已移除的待处理任务
+    //     let mut removed_pending = vec![];
+
+    //     // 按类别区分任务
+    //     let mut have_container_tasks: Vec<(usize, usize)> = Vec::new();
+    //     let mut no_container_tasks = Vec::new();
+    //     for &(req_id, fnid) in self.pending_tasks.borrow_mut().iter() {
+    //         if self.fn_containers.borrow().contains_key(&fnid) {
+    //             have_container_tasks.push((req_id, fnid));
+    //         } else {
+    //             no_container_tasks.push((req_id, fnid));
+    //         }
+    //     }
+
+    //     have_container_tasks.sort_unstable_by(|&(_, fn_id_a), &(_, fn_id_b)| {
+    //         let func_a = env.func(fn_id_a);
+    //         let func_b = env.func(fn_id_b);
+
+    //         let mem_a = func_a.mem;
+    //         let mem_b = func_b.mem;
+    //         let cpu_a = func_a.cpu;
+    //         let cpu_b = func_b.cpu;
+
+    //         // 先比较内存使用情况
+    //         match mem_a.total_cmp(&mem_b) {
+    //             Ordering::Equal => {
+    //                 // 如果内存使用情况相等，则再比较 CPU 使用情况
+    //                 cpu_a.total_cmp(&cpu_b)
+    //             }
+    //             other => other,
+    //         }
+    //     });
+
+    //     no_container_tasks.sort_unstable_by(|&(_, fn_id_a), &(_, fn_id_b)| {
+    //         let func_a = env.func(fn_id_a);
+    //         let func_b = env.func(fn_id_b);
+
+    //         let cold_start_time_a = func_a.cold_start_time;
+    //         let cold_start_time_b = func_b.cold_start_time;
+    //         let cold_start_container_cpu_a = func_a.cold_start_container_cpu_use;
+    //         let cold_start_container_cpu_b = func_b.cold_start_container_cpu_use;
+
+    //         // 先比较内存使用情况
+    //         match cold_start_time_a.cmp(&cold_start_time_b) {
+    //             Ordering::Equal => {
+    //                 // 如果内存使用情况相等，则再比较 CPU 使用情况
+    //                 cold_start_container_cpu_a.total_cmp(&cold_start_container_cpu_b)
+    //             }
+    //             other => other,
+    //         }
+    //     });
+
+    //     // 优先加载容器
+    //     for (req_id, fnid) in no_container_tasks {
+    //         self.try_load_container(fnid, env);
+
+    //         if let Some(mut fncon) = self.container_mut(fnid) {
+    //             if fncon.req_fn_state.contains_key(&req_id) {
+    //                 continue;
+    //             }
+
+    //             self.instance_cache_policy.borrow_mut().get(fnid).unwrap();
+
+    //             assert!(fncon
+    //                 .req_fn_state
+    //                 .insert(
+    //                     req_id,
+    //                     env.fn_new_fn_running_state(&env.request(req_id), fnid)
+    //                 )
+    //                 .is_none());
+    //             removed_pending.push((req_id, fnid));
+    //         }
+    //     }
+
+    //     // 优先加载内存占用小的函数
+    //     for (req_id, fnid) in have_container_tasks {
+    //         self.try_load_container(fnid, env);
+
+    //         if let Some(mut fncon) = self.container_mut(fnid) {
+    //             if fncon.req_fn_state.contains_key(&req_id) {
+    //                 continue;
+    //             }
+
+    //             self.instance_cache_policy.borrow_mut().get(fnid).unwrap();
+
+    //             assert!(fncon
+    //                 .req_fn_state
+    //                 .insert(
+    //                     req_id,
+    //                     env.fn_new_fn_running_state(&env.request(req_id), fnid)
+    //                 )
+    //                 .is_none());
+    //             removed_pending.push((req_id, fnid));
+    //         }
+    //     }
+
+    //     for (req_id, fnid) in removed_pending {
+    //         self.pending_tasks.borrow_mut().remove(&(req_id, fnid));
+    //     }
+    // }
 }
 
 impl SimEnv {

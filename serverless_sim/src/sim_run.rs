@@ -218,7 +218,7 @@ impl SimEnv {
         // 遍历所有节点
         for node in self.core.nodes_mut().iter_mut() {
             let node_id = node.node_id();
-            // 遍历该节点上的所有函数和对应的容器
+            // 遍历该节点上处于运行状态的的容器（启动状态的容器不存在函数间的数据传输）
             for (fnid, fn_container) in node
                 .fn_containers
                 .borrow_mut()
@@ -261,12 +261,18 @@ impl SimEnv {
         // go through all the transfer paths, and simulate the transfer
 
         let nodes_cnt = self.nodes().len();
+        // for x in 0..nodes_cnt {
+        //     for y in 0..nodes_cnt {
+        //         if x > y {
+        //             let connection_count = node2node_trans.len();
+        //             self.node_set_connection_count_between(x, y, connection_count);
+        //         }
+        //     }
+        // }
         for x in 0..nodes_cnt {
-            for y in 0..nodes_cnt {
-                if x > y {
-                    let connection_count = node2node_trans.len();
-                    self.node_set_connection_count_between(x, y, connection_count);
-                }
+            for y in 0..x {
+                let connection_count = node2node_trans.len();
+                self.node_set_connection_count_between(x, y, connection_count);
             }
         }
 
@@ -290,12 +296,19 @@ impl SimEnv {
         //     }
         //     p.1.recv_paths=new_recv_paths;
         // }
+
+        // for x in 0..nodes_cnt {
+        //     for y in 0..nodes_cnt {
+        //         if x > y {
+        //             // simu transfer between node x and y
+        //             self.sim_transfer_btwn_nodes(x, y, &mut node2node_trans);
+        //         }
+        //     }
+        // }
         for x in 0..nodes_cnt {
-            for y in 0..nodes_cnt {
-                if x > y {
-                    // simu transfer between node x and y
-                    self.sim_transfer_btwn_nodes(x, y, &mut node2node_trans);
-                }
+            for y in 0..x {
+                // simu transfer between node x and y
+                self.sim_transfer_btwn_nodes(x, y, &mut node2node_trans);
             }
         }
     }
@@ -399,7 +412,7 @@ impl SimEnv {
                         *n.unready_mem_mut() += self.func(fnid).mem;
 
                         // 增加该节点上被调度该函数的容器的内存使用量
-                        fc.mem_use += self.func(fnid).mem;
+                        fc.mem_use += self.func(fnid).mem; 
 
                         req_fns_2_run.insert((fnid, req_id));
                     }

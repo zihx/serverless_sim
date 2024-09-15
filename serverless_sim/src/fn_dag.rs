@@ -397,11 +397,20 @@ impl SimEnv {
             panic!("not support fntype");
         };
 
+        let range_choice = self.env_rand_i(0, 4);
+
+        let mem = match range_choice {
+            0 | 1 | 2 => self.env_rand_f(10.0, 200.0),
+            3 => self.env_rand_f(500.0, 1000.0),
+            _ => unreachable!(), // 确保只有两个选项
+        };
+
         // 创建一个Func实例并加入到core中
         self.core.fns_mut().push(Func {
             fn_id: id,
             cpu,
-            mem: self.env_rand_f(100.0, 1000.0),
+            // mem,
+            mem: self.env_rand_f(10.0, 1000.0),
             out_put_size,
             nodes: HashSet::new(),
             cold_start_container_mem_use: 100.0,

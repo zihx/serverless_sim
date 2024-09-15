@@ -15,6 +15,7 @@ use self::{
     rotate::RotateScheduler,
     ensure_scheduler::EnsureScheduler,
     load_least::LoadLeastScheduler,
+    test::TestScheduler
 };
 
 pub mod consistenthash;
@@ -29,6 +30,7 @@ pub mod hash;
 pub mod rotate;
 pub mod ensure_scheduler;
 pub mod load_least;
+pub mod test;
 
 // pub mod rule_based;
 // pub mod time_aware;
@@ -75,6 +77,9 @@ pub fn prepare_spec_scheduler(config: &Config) -> Option<Box<dyn Scheduler + Sen
         }
         "load_least" => {
             return Some(Box::new(LoadLeastScheduler::new()));
+        }
+        "test" => {
+            return Some(Box::new(TestScheduler::new(&sche_attr)));
         }
         _ => {
             return None;
